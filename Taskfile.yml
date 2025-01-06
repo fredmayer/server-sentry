@@ -1,0 +1,17 @@
+version: '3'
+
+tasks:
+  run:
+    dir: '{{.USER_WORKING_DIR}}/cmd/sentry'
+    cmds:
+      - go run sentry.go -- {{.CLI_ARGS}}
+    env:
+      CONFIG_PATH: '{{.USER_WORKING_DIR}}/config/config.yml'
+  build:
+    dir: '{{.USER_WORKING_DIR}}/cmd/sentry'
+    cmds:
+      - go build -o ../../bin/sentry sentry.go
+  install:
+    dir: '{{.USER_WORKING_DIR}}/cmd/sentry'
+    cmds:
+      - go install sentry.go
