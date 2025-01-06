@@ -21,7 +21,7 @@ func NewServers(config *models.Config) *Servers {
 	}
 }
 
-func (s *Servers) Scan() error {
+func (s *Servers) Scan(selected string) error {
 	// Рендерим красивый инфрормационный блок
 	// TODO вынести в отдельную модель
 	style := lipgloss.NewStyle().
@@ -36,6 +36,9 @@ func (s *Servers) Scan() error {
 
 	// servers
 	for _, server := range s.config.Servers {
+		if len(selected) > 0 && selected != server.Name {
+			continue
+		}
 		styles.H2(server.Name)
 
 		p, err := provider.NewProvider(server)

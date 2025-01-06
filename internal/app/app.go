@@ -47,8 +47,11 @@ func action(ctx context.Context, cmd *cli.Command) error {
 
 	// Load service
 	s := services.NewServers(config)
+
+	selected := cmd.Args().Get(0)
+
 	// Run scanner
-	err = s.Scan()
+	err = s.Scan(selected)
 
 	return err
 }
