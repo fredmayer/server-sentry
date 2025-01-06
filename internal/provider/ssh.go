@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/fredmayer/sentry/internal/models"
@@ -125,23 +124,55 @@ func (p *Provider) NginxHosts() (string, error) {
 	}
 	defer session.Close()
 
-	output, err = session.CombinedOutput("nginx -T 2>/dev/null")
+	output, err = session.CombinedOutput("nginx -T")
 	if err != nil {
 		return "", fmt.Errorf("Error running nginx -T on %e", err)
 	}
 
 	// Extract server_name values
 	config := string(output)
-	re := regexp.MustCompile(`server_name\s+([^;]+);`)
-	matches := re.FindAllStringSubmatch(config, -1)
+	lines := strings.Split(config, "\n")
 
-	if len(matches) == 0 {
-		return styles.ReturnWithX("No active hosts found in Nginx configuration"), nil
+	hosts := make([]models.NginxHost, 0)
+	var serverName string
+	var proxyPass string
+	var serverBlock bool
+
+	for _, line := range lines {
+
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "server_name") {
+			// Extract server_name value
+			parts := strings.Fields(line)
+			if len(parts) > 1 {
+				serverName = parts[1]
+			}
+		}
+
+		if strings.HasPrefix(line, "proxy_pass") {
+			// Extract proxy_pass value
+			parts := strings.Fields(line)
+			if len(parts) > 1 {
+				proxyPass = parts[1]
+			}
+		}
+
+		if strings.HasPrefix(line, "server {") {
+			if serverBlock {
+				hosts = append(hosts, models.NginxHost{
+					ServerName: serverName,
+					ProxyPass:  proxyPass,
+				})
+
+				serverName = ""
+				proxyPass = ""
+			}
+			serverBlock = true
+		}
 	}
 
-	fmt.Println(styles.ReturnWithOk("NGINX active hosts:"))
-	for _, match := range matches {
-		fmt.Printf("- %s\n", strings.TrimSpace(match[1]))
+	for _, host := range hosts {
+		fmt.Printf(" - %s -> %s \n", host.ServerName, host.ProxyPass)
 	}
 
 	return "", nil
