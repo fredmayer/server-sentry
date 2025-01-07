@@ -1,4 +1,6 @@
 github.com/BurntSushi/toml v1.4.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
+github.com/MR5356/go-console-loading v1.0.0 h1:yzYF1VBhR97QR3eR9iAaLKzz9MA0coYl6lUFBVBbzdE=
+github.com/MR5356/go-console-loading v1.0.0/go.mod h1:ejysS0xoyPVsVxNHk16VKzlAH8Cd4R2bz/Ewo3y7wrg=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1 h1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1/go.mod h1:uYgXzlJ7ZpABp8OJ+exZzJJhRNQ2ASbcXHWsFqH8hp8=
 github.com/charmbracelet/lipgloss v1.0.0 h1:O7VkGDvqEdGi93X+DeqsQ7PKHDgtQfF8j8/O2qFMQNg=

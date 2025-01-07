@@ -104,29 +104,30 @@ func (p *Provider) Pm2() (string, error) {
 	return fmt.Sprintf("%s\n%s", styles.ReturnWithOk("PM2"), string(output)), nil
 }
 
-func (p *Provider) NginxHosts() (string, error) {
+func (p *Provider) NginxHosts() ([]models.NginxHost, error) {
 	session, err := p.client.NewSession()
 	if err != nil {
-		return "", fmt.Errorf("Error creating SSH session: %e", err)
+		return nil, fmt.Errorf("Error creating SSH session: %e", err)
 	}
 	defer session.Close()
 
 	// Check if nginx is installed
 	output, err := session.CombinedOutput("command -v nginx")
 	if err != nil || strings.TrimSpace(string(output)) == "" {
-		return styles.ReturnWithX("Nginx is not installed"), nil
+		fmt.Println(styles.ReturnWithX("Nginx is not installed"))
+		return nil, nil
 	}
 
 	// Run `nginx -T` to get configuration
 	session, err = p.client.NewSession()
 	if err != nil {
-		return "", fmt.Errorf("Error creating SSH session: %e", err)
+		return nil, fmt.Errorf("Error creating SSH session: %e", err)
 	}
 	defer session.Close()
 
 	output, err = session.CombinedOutput("nginx -T")
 	if err != nil {
-		return "", fmt.Errorf("Error running nginx -T on %e", err)
+		return nil, fmt.Errorf("Error running nginx -T on %e", err)
 	}
 
 	// Extract server_name values
@@ -145,7 +146,7 @@ func (p *Provider) NginxHosts() (string, error) {
 			// Extract server_name value
 			parts := strings.Fields(line)
 			if len(parts) > 1 {
-				serverName = parts[1]
+				serverName = strings.TrimSuffix(parts[1], ";")
 			}
 		}
 
@@ -159,11 +160,12 @@ func (p *Provider) NginxHosts() (string, error) {
 
 		if strings.HasPrefix(line, "server {") {
 			if serverBlock {
-				hosts = append(hosts, models.NginxHost{
-					ServerName: serverName,
-					ProxyPass:  proxyPass,
-				})
-
+				if serverName != "localhost" {
+					hosts = append(hosts, models.NginxHost{
+						ServerName: serverName,
+						ProxyPass:  proxyPass,
+					})
+				}
 				serverName = ""
 				proxyPass = ""
 			}
@@ -171,11 +173,7 @@ func (p *Provider) NginxHosts() (string, error) {
 		}
 	}
 
-	for _, host := range hosts {
-		fmt.Printf(" - %s -> %s \n", host.ServerName, host.ProxyPass)
-	}
-
-	return "", nil
+	return hosts, nil
 }
 
 func (p *Provider) IsCommandNotFound(response string) bool {

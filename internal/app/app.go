@@ -5,6 +5,7 @@ import (
 	"os"
 
 	//"github.com/fredmayer/sentry/internal/models"
+	"github.com/MR5356/go-console-loading/loading"
 	"github.com/fredmayer/sentry/internal/models"
 	"github.com/fredmayer/sentry/internal/services"
 	log "github.com/sirupsen/logrus"
@@ -49,6 +50,15 @@ func action(ctx context.Context, cmd *cli.Command) error {
 	s := services.NewServers(config)
 
 	selected := cmd.Args().Get(0)
+
+	if selected == "host" || selected == "search" {
+		// Search handler
+		ld := loading.New("runner")
+		ld.Start("Processing...")
+		defer ld.Stop()
+
+		return s.Search(cmd.Args().Get(1))
+	}
 
 	// Run scanner
 	err = s.Scan(selected)

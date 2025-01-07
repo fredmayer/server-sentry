@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/MR5356/go-console-loading v1.0.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
 	github.com/charmbracelet/x/ansi v0.4.2 // indirect
