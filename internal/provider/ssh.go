@@ -173,6 +173,12 @@ func (p *Provider) NginxHosts() ([]models.NginxHost, error) {
 		}
 	}
 
+	if len(serverName) > 0 {
+		hosts = append(hosts, models.NginxHost{
+			ServerName: serverName,
+			ProxyPass:  proxyPass,
+		})
+	}
 	return hosts, nil
 }
 
